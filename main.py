@@ -1,48 +1,56 @@
 from LibraryDatabase import *
 
-
+#This is all one giant test for the functions
+#Create all of the books
 Wikipeida = LogicalBook("Wikipeida", "John Doe",2, 90000001)
 Mistborn = LogicalBook("Mistborn", "Brandon Sanderson",3, 90000002)
+ExtraCopyOfMistborn = LogicalBook("Mistborn", "Brandon Sanderson",1, 90000002)
 PythonForDumDums = LogicalBook("Python For Dum Dum's", "Some nerd",1, 90000003)
+ArtOfWar = LogicalBook("Art Of War", "Sun Tzu",1, 90000004)
+SecretBook = LogicalBook("Secret Book", "John Doe",1, 90000005)
 
-LibraryCatalog = Catalog(Wikipeida)
+#Add Books to Catalog
+LibraryCatalog = Catalog()
 LibraryCatalog.addBook(Mistborn)
+LibraryCatalog.addBook(ExtraCopyOfMistborn)
 LibraryCatalog.addBook(PythonForDumDums)
+LibraryCatalog.addBook(Wikipeida)
+LibraryCatalog.addBook(ArtOfWar)
+LibraryCatalog.addBook(SecretBook)
 
+#Print Current State of Catalog
 LibraryCatalog.printCatalog()
 
-print("Enter the Serial Number of the book to edit:")
-serialNum = int(input())
+#Remove Art of War
+LibraryCatalog.removeBook(ArtOfWar)
 
-print("What is the new title?")
+#Edit a Book
+print("This will edit the Python for Dumdum's book.")
+print("What is the new title of the book?")
 newTitle = input()
-
-print("What is the new author?")
+print("Who is the author of this book?")
 newAuthor = input()
+LibraryCatalog.editBook(newTitle,newAuthor,90000003)
 
-LibraryCatalog.editBook(newTitle, newAuthor, serialNum)
-
-
+#Print Catalog where Art of War is gone and the Python for Dum Dum's is modified
 LibraryCatalog.printCatalog()
 
-AnotherCopyOfMistborn = LogicalBook("Mistborn", "Brandon Sanderson", 1, 90000002)
-LibraryCatalog.addBook(AnotherCopyOfMistborn)
-Heros = LogicalBook("Heros","Brandon Sanderson", 1, 90000004)
-LibraryCatalog.addBook(Heros)
+#Find a book by serial number
+print("What is the serial number of the book you want to find?")
+serialNumber = int(input())
+foundBook = LibraryCatalog.findBookBySerialNumber(serialNumber)
+print(foundBook)
 
-print("Title        Author      Number Of Copies        Serial Number")
-for Book in LibraryCatalog.findBookByAuthor("Brandon Sanderson"):
-     print(f"{Book.title}     {Book.author}    {Book.copies}        {Book.serialNum}")
+#Find books by author
+print("What is the name of the author you want to find?")
+searchAuthor = input()
+foundBooks = LibraryCatalog.findBookByAuthor(searchAuthor)
+for Book in foundBooks:
+    print(Book)
 
-
-print("Enter the Serial Number of the book to edit:")
-serialNum = int(input())
-
-print("What is the new title?")
-newTitle = input()
-
-print("What is the new author?")
-newAuthor = input()
-
-LibraryCatalog.editBook(newTitle, newAuthor, serialNum)
-LibraryCatalog.printCatalog()
+#Find books by title
+print("What is the name of the title you want to find?")
+searchTitle = input()
+foundBooks = LibraryCatalog.findBookByTitle(searchTitle)
+for Book in foundBooks:
+    print(Book)
