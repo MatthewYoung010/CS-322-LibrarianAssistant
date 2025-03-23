@@ -158,4 +158,10 @@ class Catalog:
             connection.close()
             return [LogicalBook("N/A","N/A",0,0000000)]
         
-        
+    def getCatalog (self):
+        """Get The Catalog"""
+        connection = sqlite3.connect("Library.db")
+        cursor = connection.cursor()
+        bookCatalog = cursor.execute("SELECT * FROM Book_Catalog")
+        connection.close()
+        return bookCatalog
