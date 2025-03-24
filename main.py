@@ -79,3 +79,30 @@ searchTitle = input()
 foundBooks = LibraryCatalog.findBookByTitle(searchTitle)
 for Book in foundBooks:
     print(Book)
+
+# Initialize User Database
+UserDB = UserDatabase()
+
+# Validate user ID
+def is_valid_user(user_id):
+    return UserDB.user_exists(user_id)
+
+# Checkout book
+print("\n--- Checking out a book ---")
+user_id = int(input("Enter your User ID: "))
+
+if not is_valid_user(user_id):
+    print("Invalid User ID.")
+else:
+    serial_number = int(input("Enter the serial number of the book to checkout: "))
+    LibraryCatalog.checkOutBook(user_id, serial_number)
+
+# Return book
+print("\n--- Returning a book ---")
+user_id = int(input("Enter your User ID: "))
+
+if not is_valid_user(user_id):
+    print("Invalid User ID.")
+else:
+    serial_number = int(input("Enter the serial number of the book to return: "))
+    LibraryCatalog.returnBook(user_id, serial_number)

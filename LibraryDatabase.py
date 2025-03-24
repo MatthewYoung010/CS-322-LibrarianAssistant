@@ -13,12 +13,12 @@ class LogicalBook:
 class Catalog:
     """Catalog handles all book-related operations within the database."""
     
-    def __init__(self, db_name="library.db"):
+    def __init__(self, db_name="Library.db"):
         self.db_name = db_name
         self.initialize_database()
 
     def initialize_database(self):
-        """Ensures the books table exists in the database."""
+        """Ensures the books and transactions tables exist in the database."""
         connection = sqlite3.connect(self.db_name)
         cursor = connection.cursor()
         cursor.execute("""
@@ -30,6 +30,18 @@ class Catalog:
             serialNum INTEGER UNIQUE NOT NULL
         )
         """)
+
+        # Transactions table for book checkout
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            serialNum INTEGER NOT NULL,
+            checkout_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (serialNum) REFERENCES books(serialNum)
+        )
+        """)
+        
         connection.commit()
         connection.close()
 
@@ -119,3 +131,51 @@ class Catalog:
         books = cursor.fetchall()
         connection.close()
         return books
+
+    def checkOutBook(self, user_id, serialNum):
+        """Allows a user to check out a book if copies are available."""
+        connection = sqlite3.connect(self.db_name)
+        cursor = connection.cursor()
+
+        # Check if the book exists and if it's available
+        cursor.execute("SELECT copies FROM books WHERE serialNum = ?", (serialNum,))
+        result = cursor.fetchone()
+
+        if not result:
+            print("Book not found in catalog.")
+        elif result[0] < 1:
+            print("No copies available for checkout.")
+        else:
+            cursor.execute("SELECT * FROM transactions WHERE user_id = ? AND serialNum = ?", (user_id, serialNum))
+            existing_transaction = cursor.fetchone()
+
+            if existing_transaction:
+                print("You have already checked out this book.")
+            else:
+                # Reduce availablee copies
+                cursor.execute("UPDATE books SET copies = copies - 1 WHERE serialNum = ?", (serialNum,))
+                cursor.execute("INSERT INTO transactions (user_id, serialNum) VALUES (?, ?)", (user_id, serialNum))
+                connection.commit()
+                print("Book successfully checked out.")
+
+        connection.close()
+
+    def returnBook(self, user_id, serialNum):
+        """Allows a user to return a checked-out book."""
+        connection = sqlite3.connect(self.db_name)
+        cursor = connection.cursor()
+
+        # Check if the user has this book checked out
+        cursor.execute("SELECT * FROM transactions WHERE user_id = ? AND serialNum = ?", (user_id, serialNum))
+        transaction = cursor.fetchone()
+
+        if not transaction:
+            print("No record of this book being checked out by you.")
+        else:
+            # Remove the checkout record and increases available copies 
+            cursor.execute("DELETE FROM transactions WHERE user_id = ? AND serialNum = ?", (user_id, serialNum))
+            cursor.execute("UPDATE books SET copies = copies + 1 WHERE serialNum = ?", (serialNum,))
+            connection.commit()
+            print("Book successfully returned.")
+
+        connection.close()
