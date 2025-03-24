@@ -162,6 +162,6 @@ class Catalog:
         """Get The Catalog"""
         connection = sqlite3.connect("Library.db")
         cursor = connection.cursor()
-        bookCatalog = cursor.execute("SELECT * FROM Book_Catalog")
+        bookCatalog = cursor.execute("SELECT * FROM Book_Catalog").fetchall()
         connection.close()
         return bookCatalog
