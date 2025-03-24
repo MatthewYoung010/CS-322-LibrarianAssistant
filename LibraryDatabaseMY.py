@@ -69,21 +69,17 @@ class Catalog:
         connection = sqlite3.connect("Library.db")
         cursor = connection.cursor()
 
-        doesBookExist = self.doesBookExist(serialNumber)
-       
-        if(doesBookExist == False):
-            print("Cannot delete a book that doesn't exist.")
-            return False
-        if(((cursor.execute("SELECT Copies FROM Book_Catalog WHERE Serial_Number = ?",(serialNumber,)).fetchone()[0]) - 1) > 1):
-            cursor.execute("UPDATE Book_Catalog SET COPIES = ? WHERE Serial_Number = ?",
-                           ((cursor.execute("SELECT Copies FROM Book_Catalog WHERE Serial_Number = ?",(serialNumber,)).fetchone()[0]) - 1,serialNumber))
-            return True
-        else:
-            cursor.execute("DELETE FROM Book_Catalog WHERE Serial_Number = ?", (serialNumber,))
-            return False
+        cursor.execute("SELECT Copies FROM Book_Catalog WHERE Serial_Number = ?", (serialNumber,))
+        result = cursor.fetchone()
 
+        if result:
+            current_copies = result[0]
+            if current_copies > 1:
+                cursor.execute("UPDATE Book_Catalog SET Copies = ? WHERE Serial_Number = ?", (current_copies - 1, serialNumber))
+            else:
+                cursor.execute("DELETE FROM Book_Catalog WHERE Serial_Number = ?", (serialNumber,))
+        
         connection.commit()
-        cursor.close()
         connection.close()
     
     def editBook (self,newTitle, newAuthor, SerialNumber):
