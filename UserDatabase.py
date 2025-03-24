@@ -12,9 +12,7 @@ class User:
         self.IDNum = IDNum
         self.Password = Password
 
-        #Might add edit functions or not. Probably not since the editing will just be done in the table
 
-    
 class UserDatabase:
 
     def __init__(self, dbName='UserDatabase.db'):
@@ -31,20 +29,48 @@ class UserDatabase:
             LastName TEXT NOT NULL,
             EMail TEXT NOT NULL,
             ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            Password INTEGER NOT NULL
+            Password TEXT NOT NULL
         )
         """)
         connection.commit()
         connection.close()
-    
-    def CreateAccount (self, FirstName, LastName, EMail, Password):
-        """Create an account that gets added to the user data base."""
 
-    def Login (self, IDAttempt, passwordAttempt):
-        """Login function for user to access their account. Will probably return a bool.
-        Might have it change the state of the current user somehow to show their logged in with their credentials"""
+    def createAccount(self, firstName, lastName, EMail, password):
+        """Creates a new user account in the database."""
+        connection = sqlite3.connect(self.dbName)
+        cursor = connection.cursor()
 
-    def editAccount(self, newFirstName, newLastName, newEMail, newPassword):
-        """Edit the four editable parameters. The user must be logged in before they can edit.
-         havenn't figured out how I want to implement that yet. """
-    
+        cursor.execute("INSERT INTO UserDatabase (FirstName, LastName, EMail, Password) VALUES (?, ?, ?, ?)",
+                       (firstName, lastName, EMail, password))
+
+        connection.commit()
+        connection.close()
+        print("Account successfully created.")
+
+    def login(self, IDAttempt, passwordAttempt):
+        """Attempts to log in with the provided user ID and password."""
+        connection = sqlite3.connect(self.dbName)
+        cursor = connection.cursor()
+
+        cursor.execute("SELECT * FROM UserDatabase WHERE ID = ? AND Password = ?", (IDAttempt, passwordAttempt))
+        user = cursor.fetchone()
+        connection.close()
+
+        if user:
+            print("Login successful!")
+            return True
+        else:
+            print("Invalid ID or password.")
+            return False
+
+    def editAccount(self, userID, newFirstName, newLastName, newEMail, newPassword):
+        """Allows a user to edit their account details."""
+        connection = sqlite3.connect(self.dbName)
+        cursor = connection.cursor()
+
+        cursor.execute("UPDATE UserDatabase SET FirstName = ?, LastName = ?, EMail = ?, Password = ? WHERE ID = ?",
+                       (newFirstName, newLastName, newEMail, newPassword, userID))
+
+        connection.commit()
+        connection.close()
+        print("Account details updated successfully.")
