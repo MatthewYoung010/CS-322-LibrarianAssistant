@@ -47,7 +47,7 @@ LibraryCatalog.addBook(SecretBook)
 LibraryCatalog.printCatalog()
 
 #Remove Art of War
-LibraryCatalog.removeBook(ArtOfWar)
+LibraryCatalog.removeBook(90000004)
 
 #Edit a Book
 print("This will edit the Python for Dumdum's book.")

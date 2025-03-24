@@ -62,16 +62,17 @@ class Catalog:
         connection.close()
 
         
-    def removeBook(self, bookToRemove):
+    def removeBook(self, serialNumber):
         """Removes books based on how many copies the object has."""
         connection = sqlite3.connect("Library.db")
         cursor = connection.cursor()
 
-        doesBookExist = self.doesBookExist(bookToRemove.serialNumber)
+        doesBookExist = self.doesBookExist(serialNumber)
+       
         if(doesBookExist == False):
             print("Cannot delete a book that doesn't exist.")
             return False
-
+        bookToRemove = self.findBookBySerialNumber(serialNumber)
         if(((cursor.execute("SELECT Copies FROM Book_Catalog WHERE Serial_Number = ?",(bookToRemove.serialNumber,)).fetchone()[0]) - bookToRemove.copies) > 1):
             cursor.execute("UPDATE Book_Catalog SET COPIES = ? WHERE Serial_Number = ?",
                            ((cursor.execute("SELECT Copies FROM Book_Catalog WHERE Serial_Number = ?",(bookToRemove.serialNumber,)).fetchone()[0]) - bookToRemove.copies,bookToRemove.serialNumber))
