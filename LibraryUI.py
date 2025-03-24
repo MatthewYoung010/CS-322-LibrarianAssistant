@@ -77,7 +77,7 @@ def add_book():
     add_win.title("Add a Book")
     add_win.config(bg="#1d291b")
 
-    tk.Label(add_win, text="Serial Number:").pack(pady=(10, 5))
+    tk.Label(add_win, text="Serial Number:").pack(pady=(100, 5))
     serialNo_entry = tk.Entry(add_win)
     serialNo_entry.pack()
 
@@ -110,9 +110,32 @@ def add_book():
     add_button = tk.Button(add_win, text="Add", command=add)
     add_button.pack(pady=10)
 
+def remove_book():
+    rem_win = tk.Toplevel()
+    rem_win.geometry("500x500")
+    rem_win.title("Remove a Book")
+    rem_win.config(bg="#1d291b")
+
+    tk.Label(rem_win, text="Enter the serial number of a book to delete:").pack(pady=(200, 5))
+    serialNo_entry = tk.Entry(rem_win)
+    serialNo_entry.pack()
+
+    def rem():
+        serialNo = serialNo_entry.get()
+
+        if(library_catalog.removeBook(serialNo)):
+            messagebox.showinfo("Book Removed", "The book has successfully been removed from the library.")
+        else:
+            messagebox.showinfo("Unable to Remove", "The system encountered an error. Please try again.")
+        
+        rem_win.destroy()
+    
+    remove_button = tk.Button(rem_win, text="Remove", command=rem)
+    remove_button.pack(pady=10)
+
 # Create the buttons and labels
 create_button_with_label(add_image_tk, "Add Book", lambda: add_book())
-create_button_with_label(minus_image_tk, "Remove Book", lambda: on_button_click("Remove"))
+create_button_with_label(minus_image_tk, "Remove Book", lambda: remove_book())
 create_button_with_label(edit_image_tk, "Edit Book", lambda: on_button_click("Edit"))
 
 # Load the larger book icon

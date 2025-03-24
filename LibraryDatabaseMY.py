@@ -70,13 +70,15 @@ class Catalog:
         doesBookExist = self.doesBookExist(bookToRemove.serialNumber)
         if(doesBookExist == False):
             print("Cannot delete a book that doesn't exist.")
-            return
+            return False
 
         if(((cursor.execute("SELECT Copies FROM Book_Catalog WHERE Serial_Number = ?",(bookToRemove.serialNumber,)).fetchone()[0]) - bookToRemove.copies) > 1):
             cursor.execute("UPDATE Book_Catalog SET COPIES = ? WHERE Serial_Number = ?",
                            ((cursor.execute("SELECT Copies FROM Book_Catalog WHERE Serial_Number = ?",(bookToRemove.serialNumber,)).fetchone()[0]) - bookToRemove.copies,bookToRemove.serialNumber))
+            return True
         else:
             cursor.execute("DELETE FROM Book_Catalog WHERE Serial_Number = ?", (bookToRemove.serialNumber,))
+            return False
 
         connection.commit()
         connection.close()
