@@ -13,7 +13,7 @@ class LogicalBook:
 class Catalog:
     """Catalog handles all book-related operations within the database."""
     
-    def __init__(self, db_name="library.db"):
+    def __init__(self, db_name="Library.db"):
         self.db_name = db_name
         self.initialize_database()
 
