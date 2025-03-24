@@ -40,6 +40,7 @@ class Catalog:
         
         cursorObj.execute(BookCatalog)
         cursorObj.close() 
+        connectionObj.close()
 
 
     def addBook(self, newBook):
@@ -59,11 +60,12 @@ class Catalog:
                            VALUES (?,?,?,?)""", (newBook.serialNumber, newBook.title, newBook.author, newBook.copies))
         
         connection.commit()
+        cursor.close()
         connection.close()
 
         
     def removeBook(self, serialNumber):
-        """Removes books based on how many copies the object has."""
+        """Removes one book copy from database. If there is 0 copies left the book is deleted."""
         connection = sqlite3.connect("Library.db")
         cursor = connection.cursor()
 
@@ -72,16 +74,16 @@ class Catalog:
         if(doesBookExist == False):
             print("Cannot delete a book that doesn't exist.")
             return False
-        bookToRemove = self.findBookBySerialNumber(serialNumber)
-        if(((cursor.execute("SELECT Copies FROM Book_Catalog WHERE Serial_Number = ?",(bookToRemove.serialNumber,)).fetchone()[0]) - bookToRemove.copies) > 1):
+        if(((cursor.execute("SELECT Copies FROM Book_Catalog WHERE Serial_Number = ?",(serialNumber,)).fetchone()[0]) - 1) > 1):
             cursor.execute("UPDATE Book_Catalog SET COPIES = ? WHERE Serial_Number = ?",
-                           ((cursor.execute("SELECT Copies FROM Book_Catalog WHERE Serial_Number = ?",(bookToRemove.serialNumber,)).fetchone()[0]) - bookToRemove.copies,bookToRemove.serialNumber))
+                           ((cursor.execute("SELECT Copies FROM Book_Catalog WHERE Serial_Number = ?",(serialNumber,)).fetchone()[0]) - 1,serialNumber))
             return True
         else:
-            cursor.execute("DELETE FROM Book_Catalog WHERE Serial_Number = ?", (bookToRemove.serialNumber,))
+            cursor.execute("DELETE FROM Book_Catalog WHERE Serial_Number = ?", (serialNumber,))
             return False
 
         connection.commit()
+        cursor.close()
         connection.close()
     
     def editBook (self,newTitle, newAuthor, SerialNumber):
@@ -95,6 +97,7 @@ class Catalog:
            print("Serial Number not found")
 
        connection.commit()
+       cursor.close()
        connection.close()
 
     def printCatalog(self):
@@ -106,7 +109,7 @@ class Catalog:
         data=cursor.execute('''SELECT * FROM Book_Catalog''') 
         for row in data: 
             print(row)
-
+        cursor.close()
         connection.close()
     
     def doesBookExist(self, serialNumberOfBook):
@@ -115,9 +118,11 @@ class Catalog:
         cursor = connection.cursor()
         
         if (cursor.execute("SELECT EXISTS(SELECT 1 FROM Book_Catalog WHERE Serial_Number = ?)",(serialNumberOfBook,)).fetchone()[0] == 1):
+            cursor.close()
             connection.close()
             return True
         else:
+            cursor.close()
             connection.close()
             return False   
 
@@ -129,9 +134,11 @@ class Catalog:
 
         if (self.doesBookExist(serialNumberOfBook) == True):
             bookReturn = cursor.execute("SELECT * FROM Book_Catalog WHERE Serial_Number = ?",(serialNumberOfBook,)).fetchall()
+            cursor.close()
             connection.close()
             return bookReturn
         else:
+           cursor.close()
            connection.close()
            return [LogicalBook("N/A","N/A",0,0000000)]
             
@@ -142,9 +149,11 @@ class Catalog:
     
         if (cursor.execute("SELECT EXISTS(SELECT 1 FROM Book_Catalog WHERE Author = ?)",(authorTarget,)).fetchone()[0] == 1):
             booksReturn = cursor.execute("SELECT * FROM Book_Catalog WHERE Author = ?",(authorTarget,)).fetchall()
+            cursor.close()
             connection.close()
             return booksReturn
         else:
+            cursor.close()
             connection.close()
             return [LogicalBook("N/A","N/A",0,0000000)]
 
@@ -155,9 +164,11 @@ class Catalog:
 
         if (cursor.execute("SELECT EXISTS(SELECT 1 FROM Book_Catalog WHERE Title = ?)",(titleTarget,)).fetchone()[0] == 1):
             booksReturn = cursor.execute("SELECT * FROM Book_Catalog WHERE Title = ?",(titleTarget,)).fetchall()
+            cursor.close()
             connection.close()
             return booksReturn
         else:
+            cursor.close()
             connection.close()
             return [LogicalBook("N/A","N/A",0,0000000)]
         
@@ -166,5 +177,6 @@ class Catalog:
         connection = sqlite3.connect("Library.db")
         cursor = connection.cursor()
         bookCatalog = cursor.execute("SELECT * FROM Book_Catalog").fetchall()
+        cursor.close()
         connection.close()
         return bookCatalog
