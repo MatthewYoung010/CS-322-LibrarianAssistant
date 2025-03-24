@@ -76,11 +76,16 @@ class Catalog:
             current_copies = result[0]
             if current_copies > 1:
                 cursor.execute("UPDATE Book_Catalog SET Copies = ? WHERE Serial_Number = ?", (current_copies - 1, serialNumber))
+                connection.commit()
+                connection.close()
+                return True
             else:
                 cursor.execute("DELETE FROM Book_Catalog WHERE Serial_Number = ?", (serialNumber,))
+                connection.commit()
+                connection.close()
+                return False
         
-        connection.commit()
-        connection.close()
+        
     
     def editBook (self,newTitle, newAuthor, SerialNumber):
        """Edits the Title and Author of a book"""
