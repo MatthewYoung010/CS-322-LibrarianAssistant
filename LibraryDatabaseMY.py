@@ -79,12 +79,13 @@ class Catalog:
                 connection.commit()
                 connection.close()
                 return True
-            else:
+            else if current_copies == 0:
                 cursor.execute("DELETE FROM Book_Catalog WHERE Serial_Number = ?", (serialNumber,))
                 connection.commit()
                 connection.close()
+                return True
+            else:
                 return False
-        
         
     
     def editBook (self,newTitle, newAuthor, SerialNumber):
