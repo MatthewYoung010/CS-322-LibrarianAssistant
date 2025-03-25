@@ -79,7 +79,7 @@ class Catalog:
                 connection.commit()
                 connection.close()
                 return True
-            else if current_copies == 1:
+            elif current_copies == 1:
                 cursor.execute("DELETE FROM Book_Catalog WHERE Serial_Number = ?", (serialNumber,))
                 connection.commit()
                 connection.close()
