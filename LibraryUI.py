@@ -139,15 +139,15 @@ def add_user():
     add2_win.title("Add a User")
     add2_win.config(bg="#1d291b")
 
-    tk.Label(add_win, text="First Name:").pack(pady=(100, 5))
+    tk.Label(add2_win, text="First Name:").pack(pady=(100, 5))
     firstName_entry = tk.Entry(add2_win)
     firstName_entry.pack()
 
-    tk.Label(add_win, text="Last Name:").pack(pady=(10, 5))
+    tk.Label(add2_win, text="Last Name:").pack(pady=(10, 5))
     lastName_entry = tk.Entry(add2_win)
     lastName_entry.pack()
 
-    tk.Label(add_win, text="Email:").pack(pady=(10, 5))
+    tk.Label(add2_win, text="Email:").pack(pady=(10, 5))
     email_entry = tk.Entry(add2_win)
     email_entry.pack()
 
@@ -159,11 +159,11 @@ def add_user():
         # do stuff here
 
         # There will be a logic here that confirms the details are viable
-        messagebox.showinfo("Book Added", "Your book has been added to the catalog!")
+        messagebox.showinfo("User Added", "A new user has been added to the catalog!")
 
         add2_win.destroy()
 
-    add2_button = tk.Button(add_win, text="Add User", command=add2()
+    add2_button = tk.Button(add2_win, text="Add User", command=add2()
     add2_button.pack(pady=10)
 
 # Create the buttons and labels
