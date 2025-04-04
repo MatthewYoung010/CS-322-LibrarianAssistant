@@ -134,9 +134,11 @@ def remove_book():
     remove_button.pack(pady=10)
 
 # Create the buttons and labels
+create_button_with_label(add_image_tk, "Add User", lambda: on_button_click("Add User"))
 create_button_with_label(add_image_tk, "Add Book", lambda: add_book())
 create_button_with_label(minus_image_tk, "Remove Book", lambda: remove_book())
 create_button_with_label(edit_image_tk, "Edit Book", lambda: on_button_click("Edit"))
+create_button_with_label(edit_image_tk, "Check In & Out", lambda: on_button_click("Checking"))
 
 # Load the larger book icon
 book_image = Image.open("book.png")
