@@ -163,7 +163,7 @@ def add_user():
 
         add2_win.destroy()
 
-    add2_button = tk.Button(add2_win, text="Add User", command=add2()
+    add2_button = tk.Button(add2_win, text="Add User", command=add2())
     add2_button.pack(pady=10)
 
 # Create the buttons and labels
