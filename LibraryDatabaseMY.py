@@ -253,3 +253,14 @@ class Catalog:
 
         cursor.close()
         connection.close()
+
+    def sendNotification(self, user_id, message):
+        """Sends a notification to a user (placeholder implementation)."""
+        connection = sqlite3.connect("Library.db")
+        cursor = connection.cursor()
+        cursor.execute("INSERT INTO Notifications (user_id, message) VALUES (?, ?)", (user_id, message))
+        connection.commit()
+        cursor.close()
+        connection.close()
+        # Placeholder: Print the notification to console
+        print(f"Notification for User {user_id}: {message}")
