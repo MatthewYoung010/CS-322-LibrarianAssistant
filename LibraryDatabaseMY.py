@@ -192,3 +192,53 @@ class Catalog:
         cursor.close()
         connection.close()
         return bookCatalog
+
+    def checkOutBook(self, user_id, serialNum):
+        """Allows a user to check out a book if copies are available."""
+        connection = sqlite3.connect("Library.db")
+        cursor = connection.cursor()
+
+        # Check if the book exists and if it's available
+        cursor.execute("SELECT Copies FROM Book_Catalog WHERE Serial_Number = ?", (serialNum,))
+        result = cursor.fetchone()
+
+        if not result:
+            print("Book not found in catalog.")
+        elif result[0] < 1:
+            print("No copies available for checkout.")
+        else:
+            cursor.execute("SELECT * FROM Transactions WHERE user_id = ? AND Serial_Number = ?", (user_id, serialNum))
+            existing_transaction = cursor.fetchone()
+
+            if existing_transaction:
+                print("You have already checked out this book.")
+            else:
+                # Reduce available copies
+                cursor.execute("UPDATE Book_Catalog SET Copies = Copies - 1 WHERE Serial_Number = ?", (serialNum,))
+                cursor.execute("INSERT INTO Transactions (user_id, Serial_Number) VALUES (?, ?)", (user_id, serialNum))
+                connection.commit()
+                print("Book successfully checked out.")
+
+        cursor.close()
+        connection.close()
+
+    def returnBook(self, user_id, serialNum):
+        """Allows a user to return a checked-out book."""
+        connection = sqlite3.connect("Library.db")
+        cursor = connection.cursor()
+
+        # Check if the user has this book checked out
+        cursor.execute("SELECT * FROM Transactions WHERE user_id = ? AND Serial_Number = ?", (user_id, serialNum))
+        transaction = cursor.fetchone()
+
+        if not transaction:
+            print("No record of this book being checked out by you.")
+        else:
+            # Remove the checkout record and increase available copies 
+            cursor.execute("DELETE FROM Transactions WHERE user_id = ? AND Serial_Number = ?", (user_id, serialNum))
+            cursor.execute("UPDATE Book_Catalog SET Copies = Copies + 1 WHERE Serial_Number = ?", (serialNum,))
+            connection.commit()
+            print("Book successfully returned.")
+
+        cursor.close()
+        connection.close()
