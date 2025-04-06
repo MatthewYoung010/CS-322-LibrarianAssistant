@@ -74,3 +74,14 @@ class UserDatabase:
         connection.commit()
         connection.close()
         print("Account details updated successfully.")
+
+    def user_exists(self, user_id):
+        """Checks if a user with the given user_id exists in the database."""
+        connection = sqlite3.connect(self.dbName)
+        cursor = connection.cursor()
+        cursor.execute("SELECT ID FROM UserDatabase WHERE ID = ?", (user_id,))
+        result = cursor.fetchone()
+        cursor.close()
+        connection.close()
+        return result is not None
+
