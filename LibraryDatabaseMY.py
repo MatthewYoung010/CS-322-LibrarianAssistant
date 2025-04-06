@@ -254,6 +254,17 @@ class Catalog:
         cursor.close()
         connection.close()
 
+    def getUsersCheckedOutBooks(self, user_id):
+        """Using the user ID gets all books checked out to that user"""
+        connection = sqlite3("Library.db")
+        cursor = connection.cursor()
+        usersBooks = cursor.execute("SELECT * FROM USER WHERE user_id = ?", (user_id)).fetchall()
+        #Might need right case for when user has no checked out books
+        cursor.close()
+        connection.close()
+        return usersBooks
+
+
     def sendNotification(self, user_id, message):
         """Sends a notification to a user (placeholder implementation)."""
         connection = sqlite3.connect("Library.db")
