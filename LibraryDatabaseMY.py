@@ -27,7 +27,6 @@ class Catalog:
     """Catalog holds all of the functions for editing a catalog."""
     def __init__(self):
         connectionObj = sqlite3.connect('Library.db')
-
         cursorObj = connectionObj.cursor()
         #Deletes Table. (If parameters need to be updated delete the old table)
         cursorObj.execute("DROP TABLE IF EXISTS CATALOG")
@@ -36,9 +35,20 @@ class Catalog:
                             Title VARCHAR(255) NOT NULL,
                             Author VARCHAR(255) NOT NULL,
                             Copies INT
-                            ); """ 
-        
+                          ); """ 
         cursorObj.execute(BookCatalog)
+        
+        # Transactions table for book checkout
+        cursorObj.execute("""
+        CREATE TABLE IF NOT EXISTS Transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            Serial_Number INT NOT NULL,
+            checkout_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (Serial_Number) REFERENCES Book_Catalog(Serial_Number)
+        )
+        """)
+        
         cursorObj.close() 
         connectionObj.close()
 
