@@ -106,3 +106,26 @@ if not is_valid_user(user_id):
 else:
     serial_number = int(input("Enter the serial number of the book to return: "))
     LibraryCatalog.returnBook(user_id, serial_number)
+
+
+# Send Notification
+print("\n--- Sending a test notification ---")
+
+test_user_id = 1  # This user must exist for notification to be sent
+test_message = "Reminder: You have a book due tomorrow."
+
+if is_valid_user(test_user_id):
+    LibraryCatalog.sendNotification(test_user_id, test_message)
+else:
+    print("Invalid User ID: Notification not sent.")
+
+# Check that the notification was logged in the database
+import sqlite3
+connection = sqlite3.connect("Library.db")
+cursor = connection.cursor()
+cursor.execute("SELECT * FROM Notifications WHERE user_id = ?", (test_user_id,))
+notifications = cursor.fetchall()
+print("\nNotifications for User ID", test_user_id)
+for note in notifications:
+    print(note)
+connection.close()
