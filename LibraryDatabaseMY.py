@@ -48,6 +48,17 @@ class Catalog:
             FOREIGN KEY (Serial_Number) REFERENCES Book_Catalog(Serial_Number)
         )
         """)
+
+        # Notifications table for user notifications
+        cursorObj.execute("""
+        CREATE TABLE IF NOT EXISTS Notifications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            message TEXT NOT NULL,
+            sent BOOLEAN DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
         
         cursorObj.close() 
         connectionObj.close()
