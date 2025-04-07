@@ -63,7 +63,7 @@ class Catalog:
         # Holds table for holds on books
         cursorObj.execute("""
         CREATE TABLE IF NOT EXISTS Holds (
-                hold_id INTERGER PRIMARY KEY AUTOINCREMENT,
+                hold_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,
                 Serial_Number INTEGER NOT NULL,
                 hold_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
