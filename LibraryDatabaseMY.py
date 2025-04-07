@@ -296,3 +296,11 @@ class Catalog:
 
     def checkForHolds(self, serialNum):
         connection = sqlite3.connect("Library.db")
+        cursor = connection.cursor()
+        nextHold = cursor.execute("SELECT * FROM Holds WHERE Serial_Num = ? ORDER BY hold_date",(serialNum)).fetchone()
+        cursor.close()
+        connection.close()
+        return nextHold
+
+
+
