@@ -87,7 +87,7 @@ class UserDatabase:
     
     def get_user_database(self):
         """Gets the entire database"""
-        connection = sqlite3(self.dbName)
+        connection = sqlite3.connect(self.dbName)
         cursor = connection.cursor()
         userDatabase = cursor.execute("SELECT * FROM UserDatabase").fetchall()
         cursor.close()
@@ -96,7 +96,7 @@ class UserDatabase:
     
     def get_user_information(self, userID):
         """Using User ID gets the members information"""
-        connection = sqlite3(self.dbName)
+        connection = sqlite3.connect(self.dbName)
         cursor = connection.cursor()
         userInfo = cursor.execute("SELECT * FROM UserDatabase WHERE ID = ?", (userID)).fetchall()
         cursor.close()

@@ -60,6 +60,16 @@ class Catalog:
         )
         """)
         
+        # Holds table for holds on books
+        cursorObj.execute("""
+        CREATE TABLE IF NOT EXISTS Holds (
+                hold_id INTERGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                Serial_Number INTEGER NOT NULL,
+                hold_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (Serial_Number) REFERENCES Book_Catalog(Serial_Number)
+                          )                  
+                          """)
         cursorObj.close() 
         connectionObj.close()
 
@@ -256,7 +266,7 @@ class Catalog:
 
     def getUsersCheckedOutBooks(self, user_id):
         """Using the user ID gets all books checked out to that user"""
-        connection = sqlite3("Library.db")
+        connection = sqlite3.connect("Library.db")
         cursor = connection.cursor()
         usersBooks = cursor.execute("SELECT * FROM USER WHERE user_id = ?", (user_id)).fetchall()
         #Might need right case for when user has no checked out books
@@ -275,3 +285,14 @@ class Catalog:
         connection.close()
         # Placeholder: Print the notification to console
         print(f"Notification for User {user_id}: {message}")
+
+    def setHold (self, user_id, serialNum):
+        connection = sqlite3.connect("Library.db")
+        cursor = connection.cursor()
+        cursor.execute("INSERT INTO Holds (user_id, Serial_Number) VALUES (?,?)", (user_id,serialNum))
+        connection.commit()
+        cursor.close()
+        connection.close()
+
+    def checkForHolds(self, serialNum):
+        connection = sqlite3.connect("Library.db")
