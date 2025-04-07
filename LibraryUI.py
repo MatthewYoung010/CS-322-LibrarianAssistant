@@ -121,16 +121,17 @@ user_db = UserDatabase()
 member_controls = tk.Frame(member_tab)
 member_controls.pack(fill='x', pady=10)
 
-member_area = tk.Text(member_tab, height=20, bg="lightblue", fg="#0b2a3b", font=("Courier", 12))
+member_area = tk.Text(member_tab, height=20, bg="lightblue", fg="#0b2a3b", font=("Courier", 20))
 member_area.pack(padx=10, pady=10, fill='both', expand=True)
 
 def display_members():
     member_area.delete("1.0", tk.END)
-    members = user_db.getAllUsers()
-    member_area.insert(tk.END, f"{'Name':<25}{'Email':<40}\n")
-    member_area.insert(tk.END, "-" * 65 + "\n")
+    members = user_db.get_user_database()
+    member_area.insert(tk.END, f"{'Name':<30}{'Email':<40}\n")
+    member_area.insert(tk.END, "-" * 78 + "\n")
     for first, last, email in members:
-        member_area.insert(tk.END, f"{first} {last:<25}{email:<40}\n")
+        full_name = f"{first} {last}"
+        member_area.insert(tk.END, f"{full_name:<30}{email:<40}\n")
 
 def add_user():
     win = tk.Toplevel()
