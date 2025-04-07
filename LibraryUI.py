@@ -129,9 +129,9 @@ def display_members():
     members = user_db.get_user_database()
     member_area.insert(tk.END, f"{'Name':<30}{'Email':<40}\n")
     member_area.insert(tk.END, "-" * 78 + "\n")
-    for first, last, email in members:
-        full_name = f"{first} {last}"
-        member_area.insert(tk.END, f"{full_name:<30}{email:<40}\n")
+    for FirstName, LastName, EMail in members:
+        full_name = f"{FirstName} {LastName}"
+        member_area.insert(tk.END, f"{full_name:<30}{EMail:<40}\n")
 
 def add_user():
     win = tk.Toplevel()

@@ -17,6 +17,7 @@ class UserDatabase:
 
     def __init__(self, dbName='UserDatabase.db'):
         self.dbName = dbName
+        print(self.dbName)
         self.initializeUserDatabase()
 
     def initializeUserDatabase(self):
