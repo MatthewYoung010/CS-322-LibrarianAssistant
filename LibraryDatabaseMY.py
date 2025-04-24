@@ -73,7 +73,38 @@ class Catalog:
         cursorObj.close() 
         connectionObj.close()
 
+    def setHold (self, user_id, serialNum):
+        connection = sqlite3.connect("Library.db")
+        cursor = connection.cursor()
+        cursor.execute("INSERT INTO Holds (user_id, Serial_Number) VALUES (?,?)", (user_id,serialNum))
+        connection.commit()
+        cursor.close()
+        connection.close()
 
+    def checkForHolds(self, serialNum):
+        connection = sqlite3.connect("Library.db")
+        cursor = connection.cursor()
+        nextHold = cursor.execute("SELECT * FROM Holds WHERE Serial_Num = ? ORDER BY hold_date",(serialNum)).fetchone()
+        cursor.close()
+        connection.close()
+        return nextHold
+
+    def removeHold(self,holdID):
+        connection = sqlite3.connect("Library.db")
+        cursor = connection.cursor()
+        cursor.execute("REMOVE FROM Holds WHERE hold_id = ?",(holdID))
+        connection.commit()
+        cursor.close()
+        connection.close()
+    
+    def getHoldsList(self):
+        connection = sqlite3.connect("Library.db")
+        cursor = connection.cursor()
+        holds_list = cursor.execute("SELECT * FROM Holds").fetchall()
+        cursor.close()
+        connection.close()
+        return holds_list
+    
     def addBook(self, newBook):
         """Add a book to the catalog. If there already exists a copy of the book in the catalog 
         it will add the amount of copies in the object instead."""
@@ -226,7 +257,8 @@ class Catalog:
         if not result:
             print("Book not found in catalog.")
         elif result[0] < 1:
-            print("No copies available for checkout.")
+            print("No copies available for checkout. A hold has been placed.")
+            self.setHold(user_id,serialNum)
         else:
             cursor.execute("SELECT * FROM Transactions WHERE user_id = ? AND Serial_Number = ?", (user_id, serialNum))
             existing_transaction = cursor.fetchone()
@@ -260,6 +292,12 @@ class Catalog:
             cursor.execute("UPDATE Book_Catalog SET Copies = Copies + 1 WHERE Serial_Number = ?", (serialNum,))
             connection.commit()
             print("Book successfully returned.")
+            # Checks if there is a hold on this book
+            holdCheck = self.checkForHolds(serialNum)
+            if not holdCheck:
+                print("No holds for this book")
+            else:
+                self.checkOutBook(holdCheck[1],serialNum)
 
         cursor.close()
         connection.close()
@@ -286,21 +324,45 @@ class Catalog:
         # Placeholder: Print the notification to console
         print(f"Notification for User {user_id}: {message}")
 
-    def setHold (self, user_id, serialNum):
-        connection = sqlite3.connect("Library.db")
+    #Search functions 
+    def search_book_catalog(self, serial_number_search, title_search, author_search, copies_search):
+        connection = sqlite3.connect("LibraryDatabase.db")
         cursor = connection.cursor()
-        cursor.execute("INSERT INTO Holds (user_id, Serial_Number) VALUES (?,?)", (user_id,serialNum))
-        connection.commit()
+        search_result = cursor.execute("""
+                                        SELECT * FROM Book_Catalog WHERE
+                                        Serial_Number LIKE '%' || ? || '%' AND
+                                        Title LIKE '%' || ? || '%' AND
+                                        Author LIKE '%' || ? || '%' AND
+                                        Copies LIKE '%' || ? || '%'
+                                         """, (serial_number_search,title_search,author_search,copies_search)).fetchall()
         cursor.close()
         connection.close()
-
-    def checkForHolds(self, serialNum):
-        connection = sqlite3.connect("Library.db")
+        return search_result
+    
+    def search_checkout_list(self, checkout_id_search, user_id_search, serial_number_search):
+        connection = sqlite3.connect("LibraryDatabase.db")
         cursor = connection.cursor()
-        nextHold = cursor.execute("SELECT * FROM Holds WHERE Serial_Num = ? ORDER BY hold_date",(serialNum)).fetchone()
+        search_result = cursor.execute("""
+                                        SELECT * FROM Transactions WHERE
+                                        id LIKE '%' || ? || '%' AND
+                                        user_id LIKE '%' || ? || '%' AND
+                                        Serial_Number LIKE '%' || ? || '%'
+                                         """, (checkout_id_search,user_id_search,serial_number_search)).fetchall()
         cursor.close()
         connection.close()
-        return nextHold
+        return search_result
+    
+    def search_holds_list(self, holds_id_search, user_id_search, serial_number_search):
+        connection = sqlite3.connect("LibraryDatabase.db")
+        cursor = connection.cursor()
+        search_result = cursor.execute("""
+                                        SELECT * FROM Holds WHERE
+                                        hold_id LIKE '%' || ? || '%' AND
+                                        user_id LIKE '%' || ? || '%' AND
+                                        Serial_Number LIKE '%' || ? || '%'
+                                         """, (holds_id_search,user_id_search,serial_number_search)).fetchall()
+        cursor.close()
+        connection.close()
+        return search_result
 
-
-
+   

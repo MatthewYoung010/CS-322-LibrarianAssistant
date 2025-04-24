@@ -103,3 +103,18 @@ class UserDatabase:
         cursor.close()
         connection.close()
 
+    #New search function using the LIKE Sqlite keyword
+    def search_user(self, first_name_search, last_name_search, email_search, id_search):
+        connection = sqlite3.connect("UserDatabase.db")
+        cursor = connection.cursor()
+        search_result = cursor.execute("""
+                                        SELECT * FROM UserDatabase WHERE
+                                        FirstName LIKE '%' || ? || '%' AND
+                                        LastName LIKE '%' || ? || '%' AND
+                                        EMail LIKE '%' || ? || '%' AND
+                                        ID LIKE '%' || ? || '%'
+                                         """, (first_name_search,last_name_search,email_search,id_search)).fetchall()
+        cursor.close()
+        connection.close()
+        return search_result
+

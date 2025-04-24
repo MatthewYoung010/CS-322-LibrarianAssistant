@@ -11,3 +11,7 @@ Userdatabase = UserDatabase()
 Userdatabase.createAccount(JohnDoe.firstName,JohnDoe.lastName,JohnDoe.EMail,JohnDoe.Password)
 Userdatabase.createAccount(Ricky.firstName,Ricky.lastName,Ricky.EMail,Ricky.Password)
 Userdatabase.createAccount(Steve.firstName,Steve.lastName,Steve.EMail,Steve.Password)
+
+search_Result = Userdatabase.search_user("J","","","")
+for row in search_Result:
+    print(row)
