@@ -306,7 +306,7 @@ class Catalog:
         """Using the user ID gets all books checked out to that user"""
         connection = sqlite3.connect("Library.db")
         cursor = connection.cursor()
-        usersBooks = cursor.execute("SELECT * FROM UserDatabase WHERE user_id = ?", (user_id)).fetchall()
+        usersBooks = cursor.execute("SELECT * FROM Transactions WHERE user_id = ?", (user_id,)).fetchall()
         #Might need right case for when user has no checked out books
         cursor.close()
         connection.close()
