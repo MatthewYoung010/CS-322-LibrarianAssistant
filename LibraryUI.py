@@ -11,7 +11,7 @@ window.geometry("1280x720")
 window.title("Librarian Assistant")
 
 style = ttk.Style()
-style.configure('TNotebook.Tab', font=('Arial', 16, 'bold'))
+style.configure('TNotebook.Tab', font=('Arial', 24, 'bold'))
 style.map('Treeview', background=[('selected', '#3a3a3a')])
 
 notebook = ttk.Notebook(window)
@@ -25,12 +25,12 @@ notebook.add(member_tab, text="Members")
 # Restore all previously working icons
 add_img = ImageTk.PhotoImage(Image.open("icons/bookAdd.png").resize((40, 40)))
 remove_img = ImageTk.PhotoImage(Image.open("icons/bookRemove.png").resize((40, 40)))
-edit_img = ImageTk.PhotoImage(Image.open("icons/bookEdit.png").resize((40, 40)))
+#edit_img = ImageTk.PhotoImage(Image.open("icons/bookEdit.png").resize((40, 40)))
 book_reload_img = ImageTk.PhotoImage(Image.open("icons/bookRefresh.png").resize((40, 40)))
 mem_reload_img = ImageTk.PhotoImage(Image.open("icons/memReload.png").resize((40, 40)))
 mem_add_img = ImageTk.PhotoImage(Image.open("icons/memAdd.png").resize((40, 40)))
 mem_remove_img = ImageTk.PhotoImage(Image.open("icons/memRemove.png").resize((40, 40)))
-mem_edit_img = ImageTk.PhotoImage(Image.open("icons/memEdit.png").resize((40, 40)))
+#mem_edit_img = ImageTk.PhotoImage(Image.open("icons/memEdit.png").resize((40, 40)))
 
 library_catalog = Catalog()
 user_db = UserDatabase()
@@ -51,6 +51,25 @@ filter_combo.pack(side='left', padx=5)
 
 filter_entry = tk.Entry(book_controls, width=50)
 filter_entry.pack(side='left', padx=5)
+
+book_search_img = ImageTk.PhotoImage(Image.open("icons/bookSearch.png").resize((40, 40)))
+
+def apply_filter():
+    field = filter_combo.get()
+    query = filter_entry.get().lower()
+    search_results = []
+    if field == "Serial #":
+        search_results = library_catalog.findBookBySerialNumber(query)
+    elif field == "Title":
+        search_results = library_catalog.findBookByTitle(query)
+    elif field == "Author":
+        search_results = library_catalog.findBookByAuthor(query)
+    elif field == "Copies":
+        all_books = library_catalog.getCatalog()
+        search_results = [b for b in all_books if query in str(b[3]).lower()]
+    display_books(search_results)
+
+tk.Button(book_controls, image=book_search_img, command=apply_filter).pack(side='left', padx=10)
 
 def display_books(filtered=None):
     for row in book_tree.get_children():
@@ -145,7 +164,7 @@ def checkout_selected_book():
 # Book tab buttons
 tk.Button(book_controls, image=add_img, command=add_book).pack(side='left', padx=10)
 tk.Button(book_controls, image=remove_img, command=remove_book).pack(side='left', padx=10)
-tk.Button(book_controls, image=edit_img, command=lambda: messagebox.showinfo("Unused Feature", "Feature coming soon!")).pack(side='left', padx=10)
+#tk.Button(book_controls, image=edit_img, command=lambda: messagebox.showinfo("Unused Feature", "Feature coming soon!")).pack(side='left', padx=10)
 tk.Button(book_controls, image=book_reload_img, command=display_books).pack(side='left', padx=10)
 tk.Button(book_controls, text="Check Out Book", bg="#28a745", fg="white", font=("Arial", 12, "bold"), command=checkout_selected_book).pack(side='left', padx=10)
 
@@ -153,6 +172,33 @@ tk.Button(book_controls, text="Check Out Book", bg="#28a745", fg="white", font=(
 member_controls = tk.Frame(member_tab)
 member_controls.pack(fill='x', pady=10)
 
+mem_search_img = ImageTk.PhotoImage(Image.open("icons/memSearch.png").resize((40, 40)))
+mem_filter_combo = ttk.Combobox(member_controls, values=["ID", "Name", "Email"], width=10, state="readonly")
+mem_filter_combo.set("Filter")
+mem_filter_combo.pack(side='left', padx=5)
+
+mem_filter_entry = tk.Entry(member_controls, width=50)
+mem_filter_entry.pack(side='left', padx=5)
+
+def apply_member_filter():
+    field = mem_filter_combo.get()
+    query = mem_filter_entry.get().lower()
+    members = user_db.get_user_database()
+    if field == "ID":
+        filtered = [m for m in members if query in str(m[3]).lower()]
+    elif field == "Name":
+        filtered = [m for m in members if query in (m[0] + " " + m[1]).lower()]
+    elif field == "Email":
+        filtered = [m for m in members if query in m[2].lower()]
+    else:
+        filtered = members
+    for row in member_tree.get_children():
+        member_tree.delete(row)
+    for FirstName, LastName, EMail, ID, Password in filtered:
+        full_name = f"{FirstName} {LastName}"
+        member_tree.insert('', 'end', values=(ID, full_name, EMail))
+
+tk.Button(member_controls, image=mem_search_img, command=apply_member_filter).pack(side='left', padx=10)
 member_tree = ttk.Treeview(member_tab, columns=("ID", "Name", "Email"), show='headings', selectmode='browse')
 member_tree.heading("ID", text="ID")
 member_tree.heading("Name", text="Name")
@@ -244,7 +290,7 @@ def view_selected_member():
 
 tk.Button(member_controls, image=mem_add_img, command=add_user).pack(side='left', padx=10)
 tk.Button(member_controls, image=mem_remove_img, command=remove_user).pack(side='left', padx=10)
-tk.Button(member_controls, image=mem_edit_img, command=lambda: messagebox.showinfo("Unused Feature", "Feature coming soon!")).pack(side='left', padx=10)
+#tk.Button(member_controls, image=mem_edit_img, command=lambda: messagebox.showinfo("Unused Feature", "Feature coming soon!")).pack(side='left', padx=10)
 tk.Button(member_controls, image=mem_reload_img, command=display_members).pack(side='left', padx=10)
 tk.Button(member_controls, text="View Member Details", bg="#007bff", fg="white", font=("Arial", 12, "bold"), command=view_selected_member).pack(side='left', padx=10)
 
