@@ -59,7 +59,6 @@ def sv_checkout_book():
     user_id = data['user_id']
     serial_number = data['serial_number']
     
-    # Call the checkOutBook method from Catalog class
     catalog.checkOutBook(user_id, serial_number)
     
     return jsonify({'message': 'Book checked out successfully'}), 200
@@ -74,6 +73,20 @@ def sv_get_user_books(user_id):
             'checkout_date': book[3]
         } for book in books])
     return {'error': 'No books checked out'}, 404
+
+@app.route('/')
+def landing_page():
+    return '''
+        <html>
+            <head>
+                <title>Landing Page</title>
+            </head>
+            <body>
+                <h1>Welcome!</h1>
+                <p>This is a simple landing page for the server. If you are seeing this, that means the server is functional. You can now run the main application.</p>
+            </body>
+        </html>
+    '''
 
 if __name__ == '__main__':
     app.run(debug=True)
