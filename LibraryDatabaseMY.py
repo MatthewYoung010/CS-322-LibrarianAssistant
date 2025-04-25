@@ -326,7 +326,7 @@ class Catalog:
 
     #Search functions 
     def search_book_catalog(self, serial_number_search, title_search, author_search, copies_search):
-        connection = sqlite3.connect("LibraryDatabase.db")
+        connection = sqlite3.connect("Library.db")
         cursor = connection.cursor()
         search_result = cursor.execute("""
                                         SELECT * FROM Book_Catalog WHERE
@@ -340,7 +340,7 @@ class Catalog:
         return search_result
     
     def search_checkout_list(self, checkout_id_search, user_id_search, serial_number_search):
-        connection = sqlite3.connect("LibraryDatabase.db")
+        connection = sqlite3.connect("Library.db")
         cursor = connection.cursor()
         search_result = cursor.execute("""
                                         SELECT * FROM Transactions WHERE
@@ -353,7 +353,7 @@ class Catalog:
         return search_result
     
     def search_holds_list(self, holds_id_search, user_id_search, serial_number_search):
-        connection = sqlite3.connect("LibraryDatabase.db")
+        connection = sqlite3.connect("Library.db")
         cursor = connection.cursor()
         search_result = cursor.execute("""
                                         SELECT * FROM Holds WHERE

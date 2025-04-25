@@ -54,19 +54,22 @@ filter_entry.pack(side='left', padx=5)
 
 book_search_img = ImageTk.PhotoImage(Image.open("icons/bookSearch.png").resize((40, 40)))
 
+
 def apply_filter():
     field = filter_combo.get()
     query = filter_entry.get().lower()
-    search_results = []
+    serial, title, author, copies = "", "", "", ""
+
     if field == "Serial #":
-        search_results = library_catalog.findBookBySerialNumber(query)
+        serial = query
     elif field == "Title":
-        search_results = library_catalog.findBookByTitle(query)
+        title = query
     elif field == "Author":
-        search_results = library_catalog.findBookByAuthor(query)
+        author = query
     elif field == "Copies":
-        all_books = library_catalog.getCatalog()
-        search_results = [b for b in all_books if query in str(b[3]).lower()]
+        copies = query
+
+    search_results = library_catalog.search_book_catalog(serial, title, author, copies)
     display_books(search_results)
 
 tk.Button(book_controls, image=book_search_img, command=apply_filter).pack(side='left', padx=10)
