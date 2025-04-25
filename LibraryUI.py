@@ -4,9 +4,10 @@ from PIL import Image, ImageTk
 from LibraryDatabaseMY import LogicalBook, Catalog
 from UserDatabase import UserDatabase
 import sqlite3
+import requests
 
 window = tk.Tk()
-window.iconbitmap("icon.ico")
+#window.iconbitmap("icon.ico")
 window.geometry("1280x720")
 window.title("Librarian Assistant")
 
@@ -32,7 +33,6 @@ mem_add_img = ImageTk.PhotoImage(Image.open("icons/memAdd.png").resize((40, 40))
 mem_remove_img = ImageTk.PhotoImage(Image.open("icons/memRemove.png").resize((40, 40)))
 #mem_edit_img = ImageTk.PhotoImage(Image.open("icons/memEdit.png").resize((40, 40)))
 
-library_catalog = Catalog()
 user_db = UserDatabase()
 
 book_controls = tk.Frame(book_tab)
@@ -69,7 +69,18 @@ def apply_filter():
     elif field == "Copies":
         copies = query
 
-    search_results = library_catalog.search_book_catalog(serial, title, author, copies)
+    response = requests.get("http://127.0.0.1:5000/books")
+    response.raise_for_status()
+    all_books = response.json()
+
+    search_results = [
+    book for book in all_books
+    if (not serial or serial in str(book["serialNumber"]).lower()) and
+       (not title or title in book["title"].lower()) and
+       (not author or author in book["author"].lower()) and
+       (not copies or copies in str(book["copies"]).lower())
+]
+
     display_books(search_results)
 
 tk.Button(book_controls, image=book_search_img, command=apply_filter).pack(side='left', padx=10)
@@ -77,7 +88,17 @@ tk.Button(book_controls, image=book_search_img, command=apply_filter).pack(side=
 def display_books(filtered=None):
     for row in book_tree.get_children():
         book_tree.delete(row)
-    books = filtered if filtered else library_catalog.getCatalog()
+
+    if filtered is not None:
+        books = filtered
+    else:
+        response = requests.get("http://127.0.0.1:5000/books")
+        response.raise_for_status()
+        books = [
+            (book["serialNumber"], book["title"], book["author"], book["copies"])
+            for book in response.json()
+        ]
+
     for serial, title, author, copies in books:
         book_tree.insert('', 'end', values=(serial, title, author, copies))
 
@@ -86,7 +107,14 @@ def apply_filter():
     query = filter_entry.get().lower()
     if field not in search_vars:
         return
-    all_books = library_catalog.getCatalog()
+    
+    response = requests.get("http://127.0.0.1:5000/books")
+    response.raise_for_status()
+    all_books = [
+        (book["serialNumber"], book["title"], book["author"], book["copies"])
+        for book in response.json()
+    ]
+
     filtered = [book for book in all_books if query in str(book[list(search_vars).index(field)]).lower()]
     display_books(filtered)
 
@@ -102,16 +130,24 @@ def add_book():
         ent.pack()
         entries[field] = ent
     def submit():
-        book = LogicalBook(
-            entries["Title"].get(),
-            entries["Author"].get(),
-            int(entries["Copies"].get()),
-            int(entries["Serial No"].get())
-        )
-        library_catalog.addBook(book)
-        messagebox.showinfo("Added", "Book added!")
+        title = entries["Title"].get()
+        author = entries["Author"].get()
+        copies = int(entries["Copies"].get())
+        serial = int(entries["Serial No"].get())
+
+        response = requests.post("http://127.0.0.1:5000/books", json={
+        "title": title,
+        "author": author,
+        "copies": copies,
+        "serialNumber": serial
+        })
+        if response.status_code == 201:
+            messagebox.showinfo("Added", "Book added!")
+        else:
+            messagebox.showerror("Error", f"Failed to add book: {response.text}")
         win.destroy()
         display_books()
+
     tk.Button(win, text="Add Book", command=submit).pack(pady=10)
 
 def remove_book():
@@ -122,8 +158,9 @@ def remove_book():
     serial_entry = tk.Entry(win)
     serial_entry.pack()
     def submit():
-        success = library_catalog.removeBook(int(serial_entry.get()))
-        messagebox.showinfo("Result", "Removed" if success else "Not found")
+        serial_number = int(serial_entry.get())
+        response = requests.delete(f"http://127.0.0.1:5000/books/{serial_number}")
+        messagebox.showinfo("Result", "Removed" if response.status_code == 200 else "Not found")
         win.destroy()
         display_books()
     tk.Button(win, text="Remove", command=submit).pack(pady=10)
@@ -158,7 +195,16 @@ def checkout_selected_book():
         except ValueError:
             messagebox.showerror("Error", "Invalid serial number format for this book.")
             return
-        library_catalog.checkOutBook(user_id, serial_int)
+       
+        response = requests.post("http://localhost:5000/api/checkout", json={
+            "user_id": user_id,
+            "serial_number": serial_int
+        })
+        if response.status_code == 200:
+            messagebox.showinfo("Success", "Book checked out successfully!")
+        else:
+            messagebox.showerror("Error", f"Checkout failed: {response.text}")
+       
         checkout_win.destroy()
         display_books()
         display_members()
@@ -282,14 +328,16 @@ def view_selected_member():
     tk.Label(view_win, text=f"Name: {name}", font=("Arial", 14)).pack(pady=10)
     tk.Label(view_win, text=f"Email: {email}", font=("Arial", 12)).pack(pady=5)
     tk.Label(view_win, text="Books Checked Out:").pack(pady=10)
-    books = library_catalog.getUsersCheckedOutBooks(user_id)
-    text = tk.Text(view_win, height=15, width=60)
-    if books:
+
+    response = requests.get(f'http://127.0.0.1:5000/users/{user_id}/books')
+    if response.status_code == 200:
+        books = response.json()
+        text = tk.Text(view_win, height=15, width=60)
         for b in books:
-            text.insert(tk.END, f"Serial: {b[2]} | Checked Out ID: {b[0]} | Date: {b[3]}\n")
+            text.insert(tk.END, f"Serial: {b['serialNumber']} | Checked Out ID: {b['checkout_id']} | Date: {b['checkout_date']}\n")
+        text.pack()
     else:
-        text.insert(tk.END, "No books checked out.")
-    text.pack()
+        messagebox.showerror("Error", "Failed to retrieve books.")
 
 tk.Button(member_controls, image=mem_add_img, command=add_user).pack(side='left', padx=10)
 tk.Button(member_controls, image=mem_remove_img, command=remove_user).pack(side='left', padx=10)
